@@ -1,11 +1,11 @@
 import { render } from "ejs";
 import { readFile } from "fs/promises";
-import { existsSync } from 'fs'
+import { existsSync } from "fs";
 import { Browser, LaunchOptions, chromium, firefox, webkit } from "playwright";
 import { Context, Service } from "koishi";
 
 export const AVALIABLE_BROWSERS = ["firefox", "webkit", "chromium"] as const;
-type BrowserType = typeof AVALIABLE_BROWSERS[number];
+type BrowserType = (typeof AVALIABLE_BROWSERS)[number];
 
 // 浏览器选项
 export interface BrowserOptions {
@@ -56,7 +56,7 @@ export default class HTMLRenderer extends Service {
     protected options: BrowserOptions = {
         renderer_browser: "chromium",
         browser_proxy_host: "",
-        browser_channel: "",
+        browser_channel: ""
     };
 
     // 初始化日志
@@ -76,11 +76,11 @@ export default class HTMLRenderer extends Service {
         let browser_exsit: boolean = false;
 
         switch (this.options.renderer_browser) {
-            case 'firefox': {
+            case "firefox": {
                 browser_exsit = existsSync(firefox.executablePath());
                 break;
             }
-            case 'webkit': {
+            case "webkit": {
                 browser_exsit = existsSync(webkit.executablePath());
                 break;
             }
@@ -108,12 +108,12 @@ export default class HTMLRenderer extends Service {
         // 启动浏览器
         this._logger.debug("正在启动浏览器...");
         switch (this.options.renderer_browser) {
-            case 'firefox': {
+            case "firefox": {
                 this._logger.debug("正在以 firefox 浏览器启动服务");
                 this.browser = await firefox.launch(launch_options);
                 break;
             }
-            case 'webkit': {
+            case "webkit": {
                 this._logger.debug("正在以 webkit 浏览器启动服务");
                 this.browser = await webkit.launch(launch_options);
                 break;
@@ -151,13 +151,13 @@ export default class HTMLRenderer extends Service {
         templates_arg: Object,
         page_options: PageOptions = {
             viewport: { width: 800, height: 600 },
-            base_url: `file://${template_path}/`,
+            base_url: `file://${template_path}/`
         },
         render_options: RenderOptions = {
             wait_time: 0,
             type: "png",
             quality: undefined,
-            scale: 2,
+            scale: 2
         }
     ): Promise<Buffer> {
         // 读取模板文件
@@ -176,16 +176,19 @@ export default class HTMLRenderer extends Service {
         // 加载HTML页面
         const page = await this.browser.newPage({
             ...page_options,
-            deviceScaleFactor: render_options.scale,
+            deviceScaleFactor: render_options.scale
         });
-        await page.setContent(html, { waitUntil: "networkidle" });
+        await page.goto(page_options.base_url, { waitUntil: "networkidle" });
+        await page.evaluate((html) => {
+            document.body.innerHTML = html;
+        }, html);
         await page.waitForTimeout(render_options.wait_time);
 
         // 截图
         const image = await page.screenshot({
             fullPage: true,
             type: render_options.type,
-            quality: render_options.quality,
+            quality: render_options.quality
         });
 
         // 关闭页面
@@ -209,13 +212,13 @@ export default class HTMLRenderer extends Service {
         file_name: string,
         page_options: PageOptions = {
             viewport: { width: 800, height: 600 },
-            base_url: `file://${file_path}/`,
+            base_url: `file://${file_path}/`
         },
         render_options: RenderOptions = {
             wait_time: 0,
             type: "png",
             quality: undefined,
-            scale: 2,
+            scale: 2
         }
     ): Promise<Buffer> {
         // 读取 html 文件
@@ -230,16 +233,19 @@ export default class HTMLRenderer extends Service {
         // 加载 HTML 页面
         const page = await this.browser.newPage({
             ...page_options,
-            deviceScaleFactor: render_options.scale,
+            deviceScaleFactor: render_options.scale
         });
-        await page.setContent(page_string, { waitUntil: "networkidle" });
+        await page.goto(page_options.base_url, { waitUntil: "networkidle" });
+        await page.evaluate((html) => {
+            document.body.innerHTML = html;
+        }, page_string);
         await page.waitForTimeout(render_options.wait_time);
 
         // 截图
         const image = await page.screenshot({
             fullPage: true,
             type: render_options.type,
-            quality: render_options.quality,
+            quality: render_options.quality
         });
 
         // 关闭页面
@@ -261,28 +267,28 @@ export default class HTMLRenderer extends Service {
         url: string,
         page_options: PageOptions = {
             viewport: { width: 800, height: 600 },
-            base_url: url,
+            base_url: url
         },
         render_options: RenderOptions = {
             wait_time: 0,
             type: "png",
             quality: undefined,
-            scale: 2,
+            scale: 2
         }
     ): Promise<Buffer> {
         // 加载 URL 页面
         const page = await this.browser.newPage({
             ...page_options,
-            deviceScaleFactor: render_options.scale,
+            deviceScaleFactor: render_options.scale
         });
-        await page.goto(url);
+        await page.goto(url, { waitUntil: "networkidle" });
         await page.waitForTimeout(render_options.wait_time);
 
         // 截图
         const image = await page.screenshot({
             fullPage: true,
             type: render_options.type,
-            quality: render_options.quality,
+            quality: render_options.quality
         });
 
         // 关闭页面
@@ -306,13 +312,13 @@ export default class HTMLRenderer extends Service {
         templates_arg: Object,
         page_options: PageOptions = {
             viewport: { width: 800, height: 600 },
-            base_url: ``,
+            base_url: ``
         },
         render_options: RenderOptions = {
             wait_time: 0,
             type: "png",
             quality: undefined,
-            scale: 2,
+            scale: 2
         }
     ): Promise<Buffer> {
         // 渲染模板
@@ -321,16 +327,19 @@ export default class HTMLRenderer extends Service {
         // 加载 HTML 页面
         const page = await this.browser.newPage({
             ...page_options,
-            deviceScaleFactor: render_options.scale,
+            deviceScaleFactor: render_options.scale
         });
-        await page.setContent(html, { waitUntil: "networkidle" });
+        await page.goto(page_options.base_url, { waitUntil: "networkidle" });
+        await page.evaluate((html) => {
+            document.body.innerHTML = html;
+        }, html);
         await page.waitForTimeout(render_options.wait_time);
 
         // 截图
         const image = await page.screenshot({
             fullPage: true,
             type: render_options.type,
-            quality: render_options.quality,
+            quality: render_options.quality
         });
 
         // 关闭页面
@@ -352,28 +361,31 @@ export default class HTMLRenderer extends Service {
         html: string,
         page_options: PageOptions = {
             viewport: { width: 800, height: 600 },
-            base_url: ``,
+            base_url: ``
         },
         render_options: RenderOptions = {
             wait_time: 0,
             type: "png",
             quality: undefined,
-            scale: 2,
+            scale: 2
         }
     ): Promise<Buffer> {
         // 加载 HTML 页面
         const page = await this.browser.newPage({
             ...page_options,
-            deviceScaleFactor: render_options.scale,
+            deviceScaleFactor: render_options.scale
         });
-        await page.setContent(html, { waitUntil: "networkidle" });
+        await page.goto(page_options.base_url, { waitUntil: "networkidle" });
+        await page.evaluate((html) => {
+            document.body.innerHTML = html;
+        }, html);
         await page.waitForTimeout(render_options.wait_time);
 
         // 截图
         const image = await page.screenshot({
             fullPage: true,
             type: render_options.type,
-            quality: render_options.quality,
+            quality: render_options.quality
         });
 
         // 关闭页面
